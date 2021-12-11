@@ -128,7 +128,6 @@ def aria2c_init():
                 aria2.remove([download], force=True, files=True)
     except Exception as e:
         logging.error(f"Aria2c initializing error: {e}")
-        pass
 
 threading.Thread(target=aria2c_init).start()
 time.sleep(0.5)
@@ -436,20 +435,19 @@ try:
     ACCOUNTS_ZIP_URL = getConfig('ACCOUNTS_ZIP_URL')
     if len(ACCOUNTS_ZIP_URL) == 0:
         raise KeyError
-    else:
-        try:
-            res = requests.get(ACCOUNTS_ZIP_URL)
-            if res.status_code == 200:
-                with open('accounts.zip', 'wb+') as f:
-                    f.write(res.content)
-                    f.close()
-            else:
-                logging.error(f"Failed to download accounts.zip, link got HTTP response: {res.status_code}")
-        except Exception as e:
-            logging.error(str(e))
-            raise KeyError
-        subprocess.run(["unzip", "-q", "-o", "accounts.zip"])
-        os.remove("accounts.zip")
+    try:
+        res = requests.get(ACCOUNTS_ZIP_URL)
+        if res.status_code == 200:
+            with open('accounts.zip', 'wb+') as f:
+                f.write(res.content)
+                f.close()
+        else:
+            logging.error(f"Failed to download accounts.zip, link got HTTP response: {res.status_code}")
+    except Exception as e:
+        logging.error(str(e))
+        raise KeyError
+    subprocess.run(["unzip", "-q", "-o", "accounts.zip"])
+    os.remove("accounts.zip")
 except KeyError:
     pass
 try:

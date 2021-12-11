@@ -98,8 +98,7 @@ def _watch(bot, update, isZip=False, isLeech=False, pswd=None):
                 if quality in formats_dict:
                     formats_dict[quality][frmt['tbr']] = size
                 else:
-                    subformat = {}
-                    subformat[frmt['tbr']] = size
+                    subformat = {frmt['tbr']: size}
                     formats_dict[quality] = subformat
 
             for forDict in formats_dict:
@@ -133,16 +132,10 @@ def qual_subbuttons(task_id, qual, msg):
     height = qual_fps_ext[0]
     fps = qual_fps_ext[1]
     ext = qual_fps_ext[2]
-    tbrs = []
-    for tbr in formats_dict[qual]:
-        tbrs.append(tbr)
+    tbrs = list(formats_dict[qual])
     tbrs.sort(reverse=True)
     for index, br in enumerate(tbrs):
-        if index == 0:
-            tbr = f">{br}"
-        else:
-            sbr = index - 1
-            tbr = f"<{tbrs[sbr]}"
+        tbr = f">{br}" if index == 0 else f'<{tbrs[index - 1]}'
         if fps != '':
             video_format = f"bv*[height={height}][fps={fps}][ext={ext}][tbr{tbr}]+ba/b"
         else:
@@ -191,10 +184,7 @@ def select_format(update, context):
         return editMessage('Choose Video Quality:', msg, task_info[4])
     elif data[2] == "audio":
         query.answer()
-        if len(data) == 4:
-            playlist = True
-        else:
-            playlist = False
+        playlist = len(data) == 4
         return audio_subbuttons(task_id, msg, playlist)
     elif data[2] != "cancel":
         query.answer()
@@ -202,10 +192,7 @@ def select_format(update, context):
         link = task_info[2]
         name = task_info[3]
         qual = data[2]
-        if len(data) == 4:
-            playlist = True
-        else:
-            playlist = False
+        playlist = len(data) == 4
         ydl = YoutubeDLHelper(listener)
         threading.Thread(target=ydl.add_download,args=(link, f'{DOWNLOAD_DIR}{task_id}', name, qual, playlist)).start()
     del listener_dict[task_id]
