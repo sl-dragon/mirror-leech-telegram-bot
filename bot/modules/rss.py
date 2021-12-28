@@ -24,7 +24,7 @@ def rss_list(update, context):
 
 def rss_get(update, context):
     try:
-        args = update.message.text.split(" ", maxsplit=2)
+        args = update.message.text.split(" ")
         title = args[1]
         count = int(args[2])
         feed_url = rss_dict.get(title)
@@ -55,7 +55,7 @@ def rss_get(update, context):
 @new_thread
 def rss_sub(update, context):
     try:
-        args = update.message.text.split(" ", maxsplit=2)
+        args = update.message.text.split(" ")
         title = str(args[1])
         feed_link = str(args[2])
         exists = rss_dict.get(title)
@@ -136,7 +136,9 @@ def rss_monitor(context):
             """
             try:
                 rss_d = feedparser.parse(url_list[0])
-                if (url_list[1] != rss_d.entries[0]['link'] and url_list[2] != rss_d.entries[0]['title']):
+                last_link = rss_d.entries[0]['link']
+                last_title = rss_d.entries[0]['title']
+                if (url_list[1] != last_link and url_list[2] != last_title):
                     feed_count = 0
                     while (url_list[1] != rss_d.entries[feed_count]['link'] and url_list[2] != rss_d.entries[feed_count]['title']):
                         try:
@@ -150,9 +152,9 @@ def rss_monitor(context):
                             feed_msg += f"<b>Link: </b><code>{url}</code>"
                         sendRss(feed_msg, context.bot)
                         feed_count += 1
-                        sleep(2)
-                    DbManger().rss_update(name, str(rss_d.entries[0]['link']), str(rss_d.entries[0]['title']))
-                    rss_dict[name] = [url_list[0], str(rss_d.entries[0]['link']), str(rss_d.entries[0]['title'])]
+                        sleep(5)
+                    DbManger().rss_update(name, str(last_link), str(last_title))
+                    rss_dict[name] = [url_list[0], str(last_link), str(last_title)]
                     LOGGER.info(f"Feed Name: {name}")
                     LOGGER.info(f"Last item: {rss_d.entries[0]['link']}")
             except IndexError as e:
