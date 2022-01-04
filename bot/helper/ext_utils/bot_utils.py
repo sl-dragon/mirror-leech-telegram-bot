@@ -8,7 +8,7 @@ import requests
 import urllib.request
 
 from bot.helper.telegram_helper.bot_commands import BotCommands
-from bot import dispatcher, download_dict, download_dict_lock, STATUS_LIMIT, botStartTime, LOGGER
+from bot import dispatcher, download_dict, download_dict_lock, STATUS_LIMIT, botStartTime
 from telegram import InlineKeyboardMarkup
 from telegram.ext import CallbackQueryHandler
 from bot.helper.telegram_helper import button_build, message_utils
@@ -201,23 +201,26 @@ def turn(update, context):
     data = query.data
     data = data.split(' ')
     query.answer()
-    with download_dict_lock:
-        global COUNT, PAGE_NO
-        if data[1] == "nex":
-           if PAGE_NO == pages:
-                COUNT = 0
-                PAGE_NO = 1
-           else:
-                COUNT += STATUS_LIMIT
-                PAGE_NO += 1
-        elif data[1] == "pre":
-            if PAGE_NO == 1:
-                COUNT = STATUS_LIMIT * (pages - 1)
-                PAGE_NO = pages
-            else:
-                COUNT -= STATUS_LIMIT
-                PAGE_NO -= 1
-    message_utils.update_all_messages()
+    try:
+        with download_dict_lock:
+            global COUNT, PAGE_NO
+            if data[1] == "nex":
+                if PAGE_NO == pages:
+                    COUNT = 0
+                    PAGE_NO = 1
+                else:
+                    COUNT += STATUS_LIMIT
+                    PAGE_NO += 1
+            elif data[1] == "pre":
+                if PAGE_NO == 1:
+                    COUNT = STATUS_LIMIT * (pages - 1)
+                    PAGE_NO = pages
+                else:
+                    COUNT -= STATUS_LIMIT
+                    PAGE_NO -= 1
+        message_utils.update_all_messages()
+    except:
+        query.message.delete()
 
 def get_readable_time(seconds: int) -> str:
     result = ''
